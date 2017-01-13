@@ -9,11 +9,14 @@ Do you wanna some test watcher for golang?
 ```
   cd /your/project/
 
-  $GOROOT/bin/dude .
+  $GOROOT/bin/dude
 ```
 or
 ```
-$GOROOT/bin/dude /your/project
+  cd /your/project/
+
+  $GOROOT/bin/dude all
 ```
+
 
 Inspired by [bro](https://github.com/marioidival/bro)

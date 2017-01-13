@@ -23,9 +23,10 @@ func GetCurrentLocation() string {
 }
 
 type Dude struct {
-	GoExt    string
-	Location string
-	Files    map[string]time.Time
+	GoExt        string
+	Location     string
+	Files        map[string]time.Time
+	WatchPackage bool
 }
 
 func (b *Dude) WalkLocation() {
@@ -49,7 +50,7 @@ func (b *Dude) WalkLocation() {
 	}
 
 	filepath.Walk(b.Location, walkFunc)
-	log.Printf("[INFO]: Eye on %d files\n", len(b.Files))
+	log.Printf("[INFO]: Watch on %d files\n", len(b.Files))
 }
 
 func (b *Dude) HelpMe() {
@@ -60,6 +61,7 @@ func (b *Dude) HelpMe() {
 	}
 }
 
+// Look for file changes
 func (b *Dude) LookThem() {
 	for file, modtime := range b.Files {
 		stat, err := os.Stat(file)
@@ -71,9 +73,13 @@ func (b *Dude) LookThem() {
 		if ntime.Sub(modtime) > 0 {
 			b.Files[file] = ntime
 			log.Printf("[INFO]: Changed files %s\n", file)
-			PrepareCmd(file)
-		}
 
+			if b.WatchPackage {
+				TestPackageCommand()
+			} else {
+				PrepareCmd(file)
+			}
+		}
 	}
 }
 
@@ -93,6 +99,7 @@ func HasTestFile(dirFile, nameFile string) bool {
 	return true
 }
 
+// PrepareCmd will return a command to test just a single file.
 func PrepareCmd(path string) bool {
 	nameFile := filepath.Base(path)
 	dirFile := filepath.Dir(path)
@@ -114,7 +121,19 @@ func PrepareCmd(path string) bool {
 
 	log.Printf("[WARNING]: %s need of test man!", nameFile)
 	return false
+}
 
+// TestPackageCommand will return a command to test a whole package
+func TestPackageCommand() bool {
+	cmd := exec.Command("go", "test", "-v")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
 func TestCommand(mainFile, testFile string) bool {
@@ -126,6 +145,7 @@ func TestCommand(mainFile, testFile string) bool {
 	if err != nil {
 		return false
 	}
+
 	return true
 }
 
@@ -135,13 +155,14 @@ func main() {
 	app.Usage = "Do you need some test watcher?"
 	app.Action = func(c *cli.Context) {
 		var where string
-		if c.Args().Present() == false {
-			where = GetCurrentLocation()
-		} else {
-			where = c.Args().First()
-		}
+		where = c.Args().First()
+		log.Printf("[INFO]: Looking at %s", where)
 
 		dude := Dude{GoExt: ".go", Location: where}
+		if c.Args().Present() == true {
+			dude.WatchPackage = true
+		}
+
 		dude.WalkLocation()
 
 		dude.HelpMe()
