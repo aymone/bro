@@ -13,7 +13,7 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-// Just return folder where `bro` has running
+// Just return folder where `dude` has running
 func GetCurrentLocation() string {
 	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
@@ -22,13 +22,13 @@ func GetCurrentLocation() string {
 	return dir
 }
 
-type Bro struct {
+type Dude struct {
 	GoExt    string
 	Location string
 	Files    map[string]time.Time
 }
 
-func (b *Bro) WalkLocation() {
+func (b *Dude) WalkLocation() {
 
 	Recurse := true
 	b.Files = make(map[string]time.Time)
@@ -52,7 +52,7 @@ func (b *Bro) WalkLocation() {
 	log.Printf("[INFO]: Eye on %d files\n", len(b.Files))
 }
 
-func (b *Bro) HelpMe() {
+func (b *Dude) HelpMe() {
 	for {
 		b.LookThem()
 
@@ -60,7 +60,7 @@ func (b *Bro) HelpMe() {
 	}
 }
 
-func (b *Bro) LookThem() {
+func (b *Dude) LookThem() {
 	for file, modtime := range b.Files {
 		stat, err := os.Stat(file)
 		if err != nil {
@@ -131,8 +131,8 @@ func TestCommand(mainFile, testFile string) bool {
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "bro"
-	app.Usage = "I'll help you with tests"
+	app.Name = "Dude"
+	app.Usage = "Do you need some test watcher?"
 	app.Action = func(c *cli.Context) {
 		var where string
 		if c.Args().Present() == false {
@@ -141,10 +141,10 @@ func main() {
 			where = c.Args().First()
 		}
 
-		bro := Bro{GoExt: ".go", Location: where}
-		bro.WalkLocation()
+		dude := Dude{GoExt: ".go", Location: where}
+		dude.WalkLocation()
 
-		bro.HelpMe()
+		dude.HelpMe()
 	}
 
 	app.Run(os.Args)

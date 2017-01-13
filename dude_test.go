@@ -59,8 +59,8 @@ func TestWalkLocation(t *testing.T) {
 	here, _ := filepath.Abs(".")
 	here_test := filepath.Join(here, "test_folder")
 
-	bro := Bro{GoExt: ".go", Location: here_test}
-	bro.WalkLocation()
+	dude := Dude{GoExt: ".go", Location: here_test}
+	dude.WalkLocation()
 
 	expected := []string{
 		fmt.Sprintf("%s/%s", here_test, "fileone.go"),
@@ -69,7 +69,7 @@ func TestWalkLocation(t *testing.T) {
 	}
 
 	for _, file := range expected {
-		if _, ok := bro.Files[file]; !ok {
+		if _, ok := dude.Files[file]; !ok {
 			t.Errorf("expected %s", file)
 		}
 	}
